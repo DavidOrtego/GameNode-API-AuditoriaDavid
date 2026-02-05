@@ -1,0 +1,9 @@
+db:
+  host: <mariadb_host>
+  port: 3306
+  user: <database_user>
+  password: <user_password>
+  database: <database_name>
+
+service:
+  port: <service_port>
