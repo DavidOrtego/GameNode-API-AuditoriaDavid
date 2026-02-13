@@ -7,9 +7,25 @@ const db = require('../configuration/database.js').db;
  * @returns {Promise<Array>} Devuelve una Promesa que resuelve en un array de objetos (videojuegos).
  */
 const findAllVideogames = async () => {
-    return await db('videogames')
+    const games = await db('videogames')
       .join('companies', 'videogames.company_id', 'companies.id')
       .select('videogames.*', 'companies.name as company_name', 'companies.logo as company_logo');
+
+    const consoleRelations = await db('videogame_console')
+      .join('consoles', 'videogame_console.console_id', 'consoles.id')
+      .select('videogame_console.videogame_id', 'consoles.id', 'consoles.name');
+
+    const gamesWithConsoles = games.map(game => {
+        const gameConsoles = consoleRelations
+            .filter(relation => relation.videogame_id === game.id)
+            .map(c => ({ id: c.id, name: c.name })); 
+        return {
+            ...game,
+            consoles: gameConsoles
+        };
+    });
+
+    return gamesWithConsoles;
 };
 
 /**
