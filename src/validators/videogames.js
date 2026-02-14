@@ -85,7 +85,18 @@ const validateAddVideogame = [
   validateResult
 ]
 
+const validateUpdateVideogame = [
+  param('id')
+    .notEmpty().withMessage('ID is required')
+    .isInt({ gt: 0 }).withMessage('ID must be a positive integer'),
+  
+  ...validateAddVideogame.slice(0, -1),
+
+  validateResult
+]
+
 module.exports = {
   validateVideogameId,
-  validateAddVideogame
+  validateAddVideogame,
+  validateUpdateVideogame
 }
