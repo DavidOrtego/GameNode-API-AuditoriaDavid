@@ -1,12 +1,12 @@
 // Este archivo implementa las operaciones que se han definido en el /router/consolesRouter.js
 
-const {findAllConsoles, findConsoleById, addConsole} = require('../service/consolesService.js');
+const {findAllConsoles, findConsoleById, addConsole, updateConsole} = require('../service/consolesService.js');
 
 /**
  * Obtiene el listado completo de los videojeugos.
  * Devuelve un JSON estandarizado con el array de juegos en el campo 'data'.
- * @param {Object} req - Objeto de solicitud de Express.
- * @param {Object} res - Objeto de respuesta de Express.
+ * @param {Object} req - Objeto de solicitud.
+ * @param {Object} res - Objeto de respuesta.
  * @param {Function} next - Función para pasar el control al siguiente middleware.
  * @returns {Promise<void>} Devuelve una respuesta JSON con codigo 200 y los datos..
  */
@@ -80,8 +80,46 @@ const postConsole = async (req, res, next) => {
     }
 }
 
+/**
+ * Actualiza la consola por su id
+ * Reemplaza toda la informacion de la consola por la nueva proporcionada en el body de la peticion.
+ * @param {*} req - Objeto de la peticion
+ * @param {*} res - Objeto de la respuesta
+ * @param {*} next - Funcion middleware para manejo de errores
+ * @returns {Promise<void>} Devuelve una respuesta JSON con codigo 200 y los datos de la consola actualizada,
+ *                          o un error 404 si no se encuentra la consola.
+ */
+const putConsole = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const consoleData = req.body;
+
+        await updateConsole(id, consoleData);
+
+        const updatedConsole = await findConsoleById(id);
+
+        if(!updatedConsole) {
+            return res.status(404).json({
+                code: 404,
+                title: 'not found',
+                message: `Console with id ${id} not found after update`
+            });
+        }
+
+        res.status(200).json({
+            code: 200,
+            title: 'success',
+            message: 'Console updated successfully',
+            data: updatedConsole
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
     getAllConsoles,
     getConsoleById,
-    postConsole
+    postConsole,
+    putConsole
 }
