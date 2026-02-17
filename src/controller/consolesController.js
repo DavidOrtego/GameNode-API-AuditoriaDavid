@@ -1,6 +1,6 @@
 // Este archivo implementa las operaciones que se han definido en el /router/consolesRouter.js
 
-const {findAllConsoles, findConsoleById} = require('../service/consolesService.js');
+const {findAllConsoles, findConsoleById, addConsole} = require('../service/consolesService.js');
 
 /**
  * Obtiene el listado completo de los videojeugos.
@@ -54,7 +54,34 @@ const getConsoleById = async (req, res, next) => {
         }
 }
 
+/**
+ * Añade una nueva consola.
+ * Recibe los datos validados de la peticion
+ * @param {*} req - Objeto de la solicitud de express.
+ * @param {*} res - Objeto de la respuesta de express.
+ * @param {*} next - Función middleware para manejo de errores.
+ * @returns {Promise<void>} Devuelve una respuesta JSON con codigo 201 y los datos de la nueva consola.
+ */
+const postConsole = async (req, res, next) => {
+    try {
+        const newId = await addConsole(req.body);
+        const newConsole = {
+            id: newId,
+            ...req.body
+        };
+        res.status(201).json({
+            code: 201,
+            title: 'created',
+            message: 'Console created successfully',
+            data: newConsole
+        })
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
     getAllConsoles,
-    getConsoleById
+    getConsoleById,
+    postConsole
 }
