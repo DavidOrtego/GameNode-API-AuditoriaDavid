@@ -11,19 +11,22 @@ const findAllConsoles = async () => {
         .join('companies', 'consoles.company_id', 'companies.id')
         .select('consoles.*', 'consoles.name', 'companies.name as company_name');
 
-    const consolesWithVideogames = await Promise.all(
-        consoles.map(async (console) => {
-            const videogames = await db('videogame_console')
-                .where('videogame_console.console_id', console.id)
-                .join('videogames', 'videogame_console.videogame_id', 'videogames.id')
-                .select('videogames.id', 'videogames.title', 'videogames.description', 'videogames.genre', 'videogames.pegi_rating', 'videogames.price', 'videogames.url');
+    const VideogameRelations = await db('videogame_console')
+        .join('videogames', 'videogame_console.videogame_id', 'videogames.id')
+        .select('videogame_console.console_id', 'videogames.id as videogame_id', 'videogames.title as videogame_title');
 
-            return {
-                ...console,
-                videogames: videogames
-            };
-        })
-    );
+    const consolesWithVideogames = consoles.map((console) => {
+        const consolesVideogames = VideogameRelations
+            .filter((relation) => relation.console_id === console.id)
+            .map(v => ({
+                id: v.videogame_id,
+                title: v.videogame_title
+            }));
+        return {
+            ...console,
+            videogames: consolesVideogames
+        }
+    });
 
     return consolesWithVideogames;
 };  
