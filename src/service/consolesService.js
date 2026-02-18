@@ -65,23 +65,23 @@ const findConsoleById = async (id) => {
  */
 
 const addConsole = async (consoleData) => {
-    const { name, company_id, release_year, price, url } = consoleData;
+    const { name, description, release_date, url, company_id, videogames } = consoleData;
     const [newId] = await db('consoles').insert({
         name,
-        company_id,
-        release_year,
-        price,
-        url
+        description,
+        release_date,
+        url,
+        company_id
     });
-    
-    if (consoles && consoles.length > 0) {
-        const relations = consoles.map((videogameId) => ({
+
+    if (videogames && videogames.length > 0) {
+        const relations = videogames.map((videogameId) => ({
             console_id: newId,
             videogame_id: videogameId
         }));
         await db('videogame_console').insert(relations);
     }
-    
+
     return newId;
 }
 
@@ -94,24 +94,22 @@ const addConsole = async (consoleData) => {
  */
 
 const updateConsole = async (id, consoleData) => {
-    const { name, company_id, release_year, price, url } = consoleData;
+    const { name, description, release_date, url, company_id, videogames } = consoleData;
     await db('consoles')
-        .where({id: id})
+        .where({ id })
         .update({
             name,
-            company_id,
-            release_year,
-            price,
-            url
-    });
+            description,
+            release_date,
+            url,
+            company_id
+        });
 
-        if(consoles != undefined) {
-            await db('videogame_console')
-                .where({ 'console_id': id })
-                .del();
-        
-        if(consoles.length > 0) {
-            const relations = consoles.map((videogameId) => ({
+    if (videogames !== undefined) {
+        await db('videogame_console').where({ console_id: id }).del();
+
+        if (videogames && videogames.length > 0) {
+            const relations = videogames.map((videogameId) => ({
                 console_id: id,
                 videogame_id: videogameId
             }));
