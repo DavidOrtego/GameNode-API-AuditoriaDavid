@@ -7,9 +7,25 @@ const db = require('../configuration/database.js').db;
  * @returns {Promise<Array>} Devuelve una Promesa que resuelve en un array de objetos (videojuegos).
  */
 const findAllVideogames = async () => {
-    return await db('videogames')
+    const games = await db('videogames')
       .join('companies', 'videogames.company_id', 'companies.id')
       .select('videogames.*', 'companies.name as company_name', 'companies.logo as company_logo');
+
+    const consoleRelations = await db('videogame_console')
+      .join('consoles', 'videogame_console.console_id', 'consoles.id')
+      .select('videogame_console.videogame_id', 'consoles.id', 'consoles.name');
+
+    const gamesWithConsoles = games.map(game => {
+        const gameConsoles = consoleRelations
+            .filter(relation => relation.videogame_id === game.id)
+            .map(c => ({ id: c.id, name: c.name })); 
+        return {
+            ...game,
+            consoles: gameConsoles
+        };
+    });
+
+    return gamesWithConsoles;
 };
 
 /**
@@ -36,7 +52,67 @@ const findVideogameById = async (id) => {
   return videogame;
 };
 
+/**
+ * Añade un nuevo videojuego a la base de datos, y si se proporcionan consolas, 
+ * también añade las relaciones correspondientes en la tabla 'videogame_console'.
+ * @param {Object} videogameData - Objeto que contiene datos del juego Y el array 'consoles'.
+ * @returns {Promise<number>} Devuelve el ID del nuevo videojuego insertado.
+ */
+const addVideogame = async (videogameData) => {
+  const { consoles, ...videogameInfo } = videogameData;
+
+  const [newId] = await db('videogames').insert(videogameInfo);
+
+  if (consoles && consoles.length > 0) {
+    const relations = consoles.map(consoleId => ({
+      videogame_id: newId,
+      console_id: consoleId
+    }));
+    await db('videogame_console').insert(relations);
+  }
+
+  return newId;
+}
+
+/**
+ * Actualiza la información de un videojuego existente.
+ * Actualiza los datos básicos y, si se proporciona una lista de consolas,
+ * reemplaza las relaciones existentes por las nuevas.
+ * @param {number} id - El ID del videojuego a actualizar.
+ * @param {Object} videogameData - Objeto con los datos a actualizar (puede incluir 'consoles').
+ * @returns {Promise<number>} Devuelve el ID del videojuego actualizado.
+ */
+const updateVideogame = async (id, videogameData) => {
+  const { consoles, ...videogameInfo } = videogameData;
+
+  await db('videogames').where({ id }).update(videogameInfo);
+
+  if (consoles !== undefined) {
+    await db('videogame_console').where({ videogame_id: id }).del();
+
+    if (consoles.length > 0) {
+      const relations = consoles.map(consoleId => ({
+        videogame_id: id,
+        console_id: consoleId
+      }));
+      await db('videogame_console').insert(relations);
+    }
+  }
+}
+
+/**
+ * Elimina un videojuego por su ID.
+ * @param {number} id - El ID del videojuego a eliminar.
+ * @returns {Promise<number>} Devuelve 1 si se borró el registro, 0 si no existía.
+ */
+const removeVideogame = async (id) => {
+  return await db('videogames').where({ id }).del();
+}
+
 module.exports = {
   findAllVideogames,
-  findVideogameById
+  findVideogameById,
+  addVideogame,
+  updateVideogame,
+  removeVideogame
 }
