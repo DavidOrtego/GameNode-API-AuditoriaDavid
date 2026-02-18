@@ -52,15 +52,18 @@ const addCompany = (async (name, description, country, year_founded, website, lo
  * @param {string} logo
  * @returns {Promise<number>} Devuelve el ID de la compañia  actualizado.
  */
-const modifyCompany = (async (id, name, description, country, year_founded, website, logo) => {
-    return await db('companies').where({ id: id }).update({
-        name: name,
-        description: description,
-        country: country,
-        year_founded: year_founded,
-        website: website,
-        logo: logo
-    });
+const modifyCompany = (async (id, companyData) => {
+    const {name, description, country,year_founded,website,logo}=companyData;
+    return await db('companies')
+    .where({id})
+    .update({
+        name,
+        description,
+        country,
+        year_founded,
+        website,
+        logo
+    })
 });
 /**
  * Metodo para eliminar una empresa por su id.
@@ -68,7 +71,7 @@ const modifyCompany = (async (id, name, description, country, year_founded, webs
  * @returns {Promise<number>} Devuelve 1 si se eliminó la empresa, 0 si no se encontró.
  */
 const removeCompany = (async (id) => {
-    return await db('companies').where({ id: id }).del();
+    return await db('companies').where({id}).del();
 });
 
 module.exports = {

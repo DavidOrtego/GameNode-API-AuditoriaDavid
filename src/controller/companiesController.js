@@ -1,6 +1,5 @@
 // Archivo que implementa las operaciones que se deficen en /router/companiesRouter.js
 
-const { post } = require('../router/companiesRouter');
 const { findAllCompanies, findCompanyById, addCompany, modifyCompany, removeCompany } = require('../service/companiesService');
 
 /**
@@ -61,37 +60,39 @@ const getCompanyById = async (req, res, next) => {
  * @param {Object} res - Objeto de respuesta de Express.
  * @returns {Promise<void>} Devuelve una respuesta JSON con código 201 y los datos de la empresa creada y 409 si ya existe una empresa con el mismo nombre.
  */
-const postCompany = async (req, res) => {
-    const name = req.body.name;
+const postCompany = async (req, res, next) => {
+    try {
+        const name = req.body.name;
+        const description = req.body.description;
+        const country = req.body.country;
+        const year_founded = req.body.year_founded;
+        const website = req.body.website;
+        const logo = req.body.logo;
 
-    if (await companyExistsByName(name)) {
-        return res.status(409).json({
-            code: 409,
-            title: 'conflict',
-            message: `Company with name ${name} already exists`
+        const result = await addCompany(name, description, country, year_founded, website, logo);
+        const newId = Array.isArray(result) ? result[0] : result;
+
+        const newCompany = {
+            id: newId,
+            name,
+            description,
+            country,
+            year_founded,
+            website,
+            logo
+        };
+
+        res.status(201).json({
+            code: 201,
+            title: 'created',
+            message: `Company with name ${name} created successfully`,
+            data: newCompany
         });
-    }
-    const description = req.body.description;
-    const country = req.body.country;
-    const year_founded = req.body.year_founded;
-    const website = req.body.website;
-    const logo = req.body.logo;
 
-    const newCompanyId = await addCompany(name, description, country, year_founded, website, logo);
-    res.status(201).json({
-        code: 201,
-        title: 'created',
-        message: `Company with name ${name} created successfully`,
-        data: {
-            id: newCompanyId,
-            name: name,
-            description: description,
-            country: country,
-            year_founded: year_founded,
-            website: website,
-            logo: logo
-        }
-    });
+    } catch (error) {
+        console.error(error);
+        next(error);
+    }
 };
 
 /**
@@ -101,37 +102,33 @@ const postCompany = async (req, res) => {
  * @param {Object} res - Objeto de respuesta de Express.
  * @returns {Promise<void>} Devuelve una respuesta JSON con código 200 y los datos de la empresa actualizada o 404 si no existe.
  */
-const putCompany = async (req, res) => {
-    const id = req.params.id;
-    if (!await companyExistsById(id)) {
-        return res.status(404).json({
-            code: 404,
-            title: 'not-found',
-            message: `Company with id ${id} not exists`
-        });
-    }
-    const name = req.body.name;
-    const description = req.body.description;
-    const country = req.body.country;
-    const year_founded = req.body.year_founded;
-    const website = req.body.website;
-    const logo = req.body.logo;
+const putCompany = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const companyData = req.body;
+        await modifyCompany(id, companyData);
 
-    await modifyCompany(id, name, description, country, year_founded, website, logo);
-    res.status(200).json({
-        code: 200,
-        title: 'success',
-        message: `Company with id ${id} updated successfully`,
-        data:{
-            id: id,
-            name: name,
-            description: description,
-            country: country,
-            year_founded: year_founded,
-            website: website,
-            logo: logo
+        const updatedCompany = await findCompanyById(id);
+
+        if (!updatedCompany) {
+            return res.status(404).json({
+                code: 404,
+                title: 'not found',
+                message: `Company with id ${id} not found`
+            });
         }
-    });
+
+        res.status(200).json({
+            code: 200,
+            title: 'success',
+            message: `Company with id ${id} updated successfully`,
+            data: modifyCompany
+        });
+
+    } catch (error) {
+        next(error);
+    }
+
 };
 
 /**
@@ -141,21 +138,25 @@ const putCompany = async (req, res) => {
  * @param {Object} res - Objeto de respuesta de Express.
  * @returns {Promise<void>} Devuelve una respuesta JSON con código 200 y el mensaje de éxito o 404 si no existe la empresa.
  */
-const deleteCompany = async (req, res) => {
-    const id = req.params.id;
-    if (!await companyExistsById(id)) {
-        return res.status(404).json({
-            code: 404,
-            title: 'not-found',
-            message: `Company with id ${id} not exists`
+const deleteCompany = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const deleteCompany = await removeCompany(id);
+        if (deleteCompany === 0) {
+            return res.status(404).json({
+                code: 404,
+                title: 'not-found',
+                message: `Company with id ${id} not found`
+            });
+        }
+        res.status(200).json({
+            code: 200,
+            title: 'success',
+            message: `Company with id ${id} deleted successfully`,
         });
+    } catch (error) {
+        next(error);
     }
-    await removeCompany(id);
-    res.status(200).json({
-        code: 200,
-        title: 'success',
-        message: `Company with id ${id} deleted successfully`,
-    });
 };
 
 module.exports = {
