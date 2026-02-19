@@ -10,7 +10,6 @@ const {findAllConsoles, findConsoleById, addConsole, updateConsole, removeConsol
  * @param {Function} next - Función para pasar el control al siguiente middleware.
  * @returns {Promise<void>} Devuelve una respuesta JSON con codigo 200 y los datos..
  */
-
 const getAllConsoles = async (req, res, next) => {
     try {
         const consoles = await findAllConsoles();
@@ -23,7 +22,7 @@ const getAllConsoles = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-}
+};
 
 /**
  * Obtiene el detalle de una consola especifica por su ID.
@@ -33,7 +32,6 @@ const getAllConsoles = async (req, res, next) => {
  * @param {Function} next - Función middleware para manejo de errores.
  * @returns {Promise<void>} Devuelve una respuesta JSON con codigo 200 y los datos del juego o 404 si no existe..
  */
-
 const getConsoleById = async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -54,17 +52,16 @@ const getConsoleById = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-}
+};
 
 /**
  * Añade una nueva consola.
- * Recibe los datos validados de la peticion
- * @param {*} req - Objeto de la solicitud de express.
- * @param {*} res - Objeto de la respuesta de express.
- * @param {*} next - Función middleware para manejo de errores.
- * @returns {Promise<void>} Devuelve una respuesta JSON con codigo 201 y los datos de la nueva consola.
+ * Recibe los datos validados en el cuerpo de la petición.
+ * @param {import('express').Request} req - Objeto de petición.
+ * @param {import('express').Response} res - Objeto de respuesta.
+ * @param {import('express').NextFunction} next - Función middleware para manejo de errores.
+ * @returns {Promise<void>} Devuelve una respuesta JSON con código 201 y los datos de la nueva consola.
  */
-
 const postConsole = async (req, res, next) => {
     try {
         const newId = await addConsole(req.body);
@@ -77,11 +74,11 @@ const postConsole = async (req, res, next) => {
             title: 'created',
             message: 'Console created successfully',
             data: newConsole
-        })
+        });
     } catch (error) {
         next(error);
     }
-}
+};
 
 /**
  * Actualiza la consola por su id
