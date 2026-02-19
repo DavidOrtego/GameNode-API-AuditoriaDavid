@@ -37,7 +37,6 @@ const findAllConsoles = async () => {
  * @param {number} id 
  * @returns {Promise<Object|null>} Devuelve una promesa que resuelve en un objeto (consola) o null si no se encuentra la consola.
  */
-
 const findConsoleById = async (id) => {
     const console = await db('consoles')
         .where('consoles.id', id)
@@ -60,22 +59,16 @@ const findConsoleById = async (id) => {
 /**
  * Añade una nueva consola a la base de datos, y si se proporcionan videojuegos, también añade las relaciones 
  * correspondientes en la tabla intermedia.
- * @param {Object} consoleData - Objeto con los datos de la consola a añadir.
- * @returns {Promise<number>} Devuelve una promesa que resuelve en el ID de la nueva consola creada.
+ * @param {Object} consoleData - Objeto que contiene datos de la consola Y el array de 'videogames'.
+ * @returns {Promise<number>} Devuelve el ID de la nueva consola insertado.
  */
-
 const addConsole = async (consoleData) => {
-    const { name, description, release_date, url, company_id, videogames } = consoleData;
-    const [newId] = await db('consoles').insert({
-        name,
-        description,
-        release_date,
-        url,
-        company_id
-    });
+    const { videogames, ...consoleInfo } = consoleData;
+
+    const [newId] = await db('consoles').insert(consoleInfo);
 
     if (videogames && videogames.length > 0) {
-        const relations = videogames.map((videogameId) => ({
+        const relations = videogames.map(videogameId => ({
             console_id: newId,
             videogame_id: videogameId
         }));
@@ -83,7 +76,7 @@ const addConsole = async (consoleData) => {
     }
 
     return newId;
-}
+};
 
 /**
  * Actualiza la informacion de la consola existente.
