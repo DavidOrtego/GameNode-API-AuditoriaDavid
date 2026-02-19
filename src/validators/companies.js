@@ -1,6 +1,6 @@
 // Archivo de validacion
 
-const { param,body } = require('express-validator');
+const { param, body } = require('express-validator');
 const { validateResult } = require('../middlewares/validateResult');
 
 /**
@@ -18,8 +18,16 @@ const validateCompanyId = [
     validateResult
 ];
 
-//validar por post company, putcompany, deletecompany
-
+/**
+ * Cadena de validaciones para la creación de una nueva empresa.
+ * Se aplica a la ruta POST /.
+ * * Reglas:
+ * 1. 'name': Obligatorio, cadena de texto, máximo 100 caracteres.
+ * 2. 'description': Opcional, cadena de texto, máximo 255 caracteres.
+ * 3. 'country': Obligatorio, cadena de texto, máximo 50 caracteres.
+ * 4. 'year_founded': Obligatorio, número entero lógico (entre 1800 y el año actual).
+ * 5. 'website': Obligatorio, cadena de texto, máximo 255 caracteres.
+ */
 const validateAddCompany = [
     body('name')
         .notEmpty().withMessage('Name is required')
@@ -33,7 +41,7 @@ const validateAddCompany = [
     
     body('country')
         .notEmpty().withMessage('Country is required')
-        .isString().withMessage('Counry must be a string')
+        .isString().withMessage('Country must be a string')
         .isLength({ max: 50 }).withMessage('Country must be at most 50 characters long'),
 
     body('year_founded')
