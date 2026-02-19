@@ -40,7 +40,7 @@ const findVideogameById = async (id) => {
     .select('videogames.*', 'companies.name as company_name', 'companies.logo as company_logo')
     .first();
   
-    if (!videogame) return null;
+  if (!videogame) return null;
 
   const consoles = await db('videogame_console')
     .where('videogame_console.videogame_id', id)
