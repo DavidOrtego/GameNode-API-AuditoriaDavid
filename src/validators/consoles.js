@@ -68,22 +68,21 @@ const validateAddConsole = [
 ];
 
 /**
- * Cadena de validaciones para la actualizacion completa de una consola
+ * Cadena de validaciones para la actualización completa de una consola.
  * Se aplica a la ruta PUT /:id
- * Reglas:
- * 1. El parametro 'id' debe existir en la URL.
- * 2. El cuerpo de la peticion debe cumplir las mismas reglas que la creacion (POST)
+ * * Reglas:
+ * 1. El párametro 'id' debe existir en la URL y ser un número entero positivo.
+ * 2. El cuerpo de la petición debe cumplir las mismas reglas que la creación (POST)
  */
-
 const validateUpdateConsole = [
     param('id')
-        .notEmpty().withMessage('id is required')
-        .isInt({ gt: 0 }).withMessage('id must be a positive integer'),
+        .notEmpty().withMessage('ID is required')
+        .isInt({ gt: 0 }).withMessage('ID must be a positive integer'),
 
     ...validateAddConsole.slice(0, -1), 
 
     validateResult
-]
+];
 
 module.exports = {
     validateConsoleId,
