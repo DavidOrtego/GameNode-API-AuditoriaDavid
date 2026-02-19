@@ -105,14 +105,13 @@ const updateConsole = async (id, consoleData) => {
 };
 
 /**
- * Elimina una consola de la base de datos.
- * @param {*} id - El id de la consola a eliminar
- * @returns {Promise<number>} Devuelve una promesa que resuelve en el número de filas eliminadas.
+ * Elimina una consola por su ID.
+ * @param {number} id - El id de la consola a eliminar
+ * @returns {Promise<number>} Devuelve 1 si se borró el registro, 0 si no existía.
  */
-
 const removeConsole = async (id) => {
     return await db('consoles').where({ id }).del();
-}
+};
 
 module.exports = {
     findAllConsoles,
