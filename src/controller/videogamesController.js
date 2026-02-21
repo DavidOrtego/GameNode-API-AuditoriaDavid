@@ -22,7 +22,7 @@ const getAllVideogames = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-}
+};
 
 /**
  * Obtiene el detalle de un videojuego específico por su ID.
@@ -52,7 +52,7 @@ const getVideogameById = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-}
+};
 
 /**
  * Añade un nuevo videojuego.
@@ -78,10 +78,10 @@ const postVideogame = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-}
+};
 
 /**
- * Actualiza un videojuego por su ID.
+ * Actualiza los datos de un videojuego por su ID.
  * Reemplaza los datos de un videojuego con los dados en el cuerpo de la petición.
  * @param {import('express').Request} req - Objeto de petición.
  * @param {import('express').Response} res - Objeto de respuesta.
@@ -115,7 +115,7 @@ const putVideogame = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-}
+};
 
 /**
  * Elimina un videojuego por su ID. 
@@ -147,7 +147,7 @@ const deleteVideogame = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-}
+};
 
 module.exports = {
   getAllVideogames,

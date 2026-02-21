@@ -1,6 +1,6 @@
 // Archivo que implementa las operaciones que se deficen en /router/companiesRouter.js
 
-const { findAllCompanies, findCompanyById, addCompany, modifyCompany, removeCompany } = require('../service/companiesService');
+const { findAllCompanies, findCompanyById, addCompany, updateCompany, removeCompany } = require('../service/companiesService');
 
 /**
  * Obtien el listado de todas las empresas.
@@ -22,7 +22,7 @@ const getAllCompanies = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-}
+};
 
 /**
  * Obtine el detalle de una empresa por su id.
@@ -52,68 +52,57 @@ const getCompanyById = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-}
-/**
- * Metodo para agregar una nueva empresa a la base de datos.
- * Valida si ya existe una empresa con el mismo nombre antes de agregarla.
- * @param {Object} req - Objeto de petición de Express.
- * @param {Object} res - Objeto de respuesta de Express.
- * @returns {Promise<void>} Devuelve una respuesta JSON con código 201 y los datos de la empresa creada y 409 si ya existe una empresa con el mismo nombre.
- */
-const postCompany = async (req, res, next) => {
-    try {
-        const name = req.body.name;
-        const description = req.body.description;
-        const country = req.body.country;
-        const year_founded = req.body.year_founded;
-        const website = req.body.website;
-        const logo = req.body.logo;
-
-        const result = await addCompany(name, description, country, year_founded, website, logo);
-        const newId = Array.isArray(result) ? result[0] : result;
-
-        const newCompany = {
-            id: newId,
-            name,
-            description,
-            country,
-            year_founded,
-            website,
-            logo
-        };
-
-        res.status(201).json({
-            code: 201,
-            title: 'created',
-            message: `Company with name ${name} created successfully`,
-            data: newCompany
-        });
-
-    } catch (error) {
-        console.error(error);
-        next(error);
-    }
 };
 
 /**
- * Metodo para modificar una empresa existente.
- * Valida si la empresa existe antes de modificarla.
- * @param {Object} req - Objeto de petición de Express.
- * @param {Object} res - Objeto de respuesta de Express.
- * @returns {Promise<void>} Devuelve una respuesta JSON con código 200 y los datos de la empresa actualizada o 404 si no existe.
+ * Agrega una nueva empresa a la base de datos.
+ * @param {import('express').Request} req - Objeto de petición de Express.
+ * @param {import('express').Response} res - Objeto de respuesta de Express.
+ * @param {import('express').NextFunction} next - Función middleware para manejo de errores.
+ * @returns {Promise<void>} Devuelve una respuesta JSON con código 201 y los datos de la empresa creada.
+ */
+const postCompany = async (req, res, next) => {
+  try {
+    const companyData = req.body;
+    const newId = await addCompany(companyData);
+    const newCompany = {
+      id: newId,
+      ...companyData     
+    }
+
+    res.status(201).json({
+      code: 201,
+      title: 'created',
+      message: `Company with name ${companyData.name} created successfully`,
+      data: newCompany
+    });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+};
+
+/**
+ * Actualiza los datos de una empresa por su ID.
+ * Reemplaza los datos de una empresa con los dados en el cuerpo de la petición.
+ * @param {import('express').Request} req - Objeto de petición de Express.
+ * @param {import('express').Response} res - Objeto de respuesta de Express.
+ * @param {import('express').NextFunction} next - Función middleware para manejo de errores.
+ * @returns {Promise<void>} Devuelve una respuesta JSON con código 200 y los datos actualizados, o 404 si no se encuentra la empresa.
  */
 const putCompany = async (req, res, next) => {
     try {
         const { id } = req.params;
         const companyData = req.body;
-        await modifyCompany(id, companyData);
+        
+        await updateCompany(id, companyData);
 
         const updatedCompany = await findCompanyById(id);
 
         if (!updatedCompany) {
             return res.status(404).json({
                 code: 404,
-                title: 'not found',
+                title: 'not-found',
                 message: `Company with id ${id} not found`
             });
         }
@@ -122,27 +111,28 @@ const putCompany = async (req, res, next) => {
             code: 200,
             title: 'success',
             message: `Company with id ${id} updated successfully`,
-            data: modifyCompany
+            data: updatedCompany
         });
 
     } catch (error) {
         next(error);
     }
-
 };
 
 /**
- * Metodo para eliminar una empresa por su id.
- * Valida si la empresa existe antes de eliminarla.
- * @param {Object} req - Objeto de petición de Express.
- * @param {Object} res - Objeto de respuesta de Express.
- * @returns {Promise<void>} Devuelve una respuesta JSON con código 200 y el mensaje de éxito o 404 si no existe la empresa.
+ * Elimina una empresa por su ID.
+ * @param {import('express').Request} req - Objeto de petición de Express.
+ * @param {import('express').Response} res - Objeto de respuesta de Express.
+ * @param {import('express').NextFunction} next - Función middleware para manejo de errores.
+ * @returns {Promise<void>} Devuelve una respuesta JSON con código 200 si la empresa ha sido eliminada, o 404 si no encuentra la empresa.
  */
 const deleteCompany = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const deleteCompany = await removeCompany(id);
-        if (deleteCompany === 0) {
+
+        const deletedCompany = await removeCompany(id);
+
+        if (deletedCompany === 0) {
             return res.status(404).json({
                 code: 404,
                 title: 'not-found',
@@ -152,8 +142,9 @@ const deleteCompany = async (req, res, next) => {
         res.status(200).json({
             code: 200,
             title: 'success',
-            message: `Company with id ${id} deleted successfully`,
+            message: `Company with id ${id} deleted successfully`
         });
+
     } catch (error) {
         next(error);
     }
