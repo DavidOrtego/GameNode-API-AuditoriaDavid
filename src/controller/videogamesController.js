@@ -48,6 +48,7 @@ const getVideogameById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const videogame = await findVideogameById(id);
+    
     if (!videogame) {
       return res.status(404).json({
         code: 404,
@@ -55,11 +56,19 @@ const getVideogameById = async (req, res, next) => {
         message: `Videogame with id ${id} not found`
       });
     }
+    
+    const taxPrice = calculatePriceWithTax(Number(videogame.price));
+
+    const videogameWithTax = {
+      ...videogame,
+      ...(taxPrice !== null && { priceWithTax: taxPrice })
+    };  
+
     res.status(200).json({
       code: 200,
       title: 'success',
       message: 'Videogame retrieved successfully',
-      data: videogame
+      data: videogameWithTax
     })
   } catch (error) {
     next(error);
