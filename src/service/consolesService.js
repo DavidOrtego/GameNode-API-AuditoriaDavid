@@ -12,17 +12,14 @@ const findAllConsoles = async () => {
         .join('companies', 'consoles.company_id', 'companies.id')
         .select('consoles.*', 'consoles.name', 'companies.name as company_name');
 
-    const VideogameRelations = await db('videogame_console')
+    const videogameRelations = await db('videogame_console')
         .join('videogames', 'videogame_console.videogame_id', 'videogames.id')
         .select('videogame_console.console_id', 'videogames.id as videogame_id', 'videogames.title as videogame_title');
 
     const consolesWithVideogames = consoles.map((console) => {
-        const consolesVideogames = VideogameRelations
-            .filter((relation) => relation.console_id === console.id)
-            .map(v => ({
-                id: v.videogame_id,
-                title: v.videogame_title
-            }));
+        const consolesVideogames = videogameRelations
+            .filter(relation => relation.console_id === console.id)
+            .map(v => ({ id: v.videogame_id, title: v.videogame_title }));
         return {
             ...console,
             videogames: consolesVideogames
@@ -37,7 +34,6 @@ const findAllConsoles = async () => {
  * @param {number} id 
  * @returns {Promise<Object|null>} Devuelve una promesa que resuelve en un objeto (consola) o null si no se encuentra la consola.
  */
-
 const findConsoleById = async (id) => {
     const console = await db('consoles')
         .where('consoles.id', id)
@@ -60,22 +56,16 @@ const findConsoleById = async (id) => {
 /**
  * Añade una nueva consola a la base de datos, y si se proporcionan videojuegos, también añade las relaciones 
  * correspondientes en la tabla intermedia.
- * @param {Object} consoleData - Objeto con los datos de la consola a añadir.
- * @returns {Promise<number>} Devuelve una promesa que resuelve en el ID de la nueva consola creada.
+ * @param {Object} consoleData - Objeto que contiene datos de la consola Y el array de 'videogames'.
+ * @returns {Promise<number>} Devuelve el ID de la nueva consola insertado.
  */
-
 const addConsole = async (consoleData) => {
-    const { name, description, release_date, url, company_id, videogames } = consoleData;
-    const [newId] = await db('consoles').insert({
-        name,
-        description,
-        release_date,
-        url,
-        company_id
-    });
+    const { videogames, ...consoleInfo } = consoleData;
+
+    const [newId] = await db('consoles').insert(consoleInfo);
 
     if (videogames && videogames.length > 0) {
-        const relations = videogames.map((videogameId) => ({
+        const relations = videogames.map(videogameId => ({
             console_id: newId,
             videogame_id: videogameId
         }));
@@ -83,33 +73,26 @@ const addConsole = async (consoleData) => {
     }
 
     return newId;
-}
+};
 
 /**
- * Actualiza la informacion de la consola existente.
- * Actualiza los datos basicos y si se proporcionan videojuegos, actualiza las relaciones correspondientes en la tabla intermedia.
+ * Actualiza la información de una consola existente.
+ * Actualiza los datos básicos y si se proporciona una lista de videojuegos, 
+ * reemplaza las relaciones existentes por las nuevas.
  * @param {number} id - El id de la consola a actualizar. 
- * @param {*} consoleData - Objeto con los datos de la consola a actualizar.
- * @return {Promise<void>} Devuelve una promesa que se resuelve cuando la consola ha sido actualizada correctamente.
+ * @param {Object} consoleData - Objeto con los datos de la consola a actualizar (puede incluir 'videogames').
+ * @returns {Promise<void>}  No devuelve ningún valor. Ejecuta la operación en la base de datos.
  */
-
 const updateConsole = async (id, consoleData) => {
-    const { name, description, release_date, url, company_id, videogames } = consoleData;
-    await db('consoles')
-        .where({ id })
-        .update({
-            name,
-            description,
-            release_date,
-            url,
-            company_id
-        });
+    const { videogames, ...consoleInfo } = consoleData;
+    
+    await db('consoles').where({ id }).update(consoleInfo);
 
     if (videogames !== undefined) {
         await db('videogame_console').where({ console_id: id }).del();
 
-        if (videogames && videogames.length > 0) {
-            const relations = videogames.map((videogameId) => ({
+        if (videogames.length > 0) {
+            const relations = videogames.map(videogameId => ({
                 console_id: id,
                 videogame_id: videogameId
             }));
@@ -119,14 +102,13 @@ const updateConsole = async (id, consoleData) => {
 };
 
 /**
- * Elimina una consola de la base de datos.
- * @param {*} id - El id de la consola a eliminar
- * @returns {Promise<number>} Devuelve una promesa que resuelve en el número de filas eliminadas.
+ * Elimina una consola por su ID.
+ * @param {number} id - El id de la consola a eliminar
+ * @returns {Promise<number>} Devuelve 1 si se borró el registro, 0 si no existía.
  */
-
 const removeConsole = async (id) => {
     return await db('consoles').where({ id }).del();
-}
+};
 
 module.exports = {
     findAllConsoles,
@@ -135,4 +117,3 @@ module.exports = {
     updateConsole,
     removeConsole
 }
-

@@ -40,7 +40,7 @@ const findVideogameById = async (id) => {
     .select('videogames.*', 'companies.name as company_name', 'companies.logo as company_logo')
     .first();
   
-    if (!videogame) return null;
+  if (!videogame) return null;
 
   const consoles = await db('videogame_console')
     .where('videogame_console.videogame_id', id)
@@ -72,7 +72,7 @@ const addVideogame = async (videogameData) => {
   }
 
   return newId;
-}
+};
 
 /**
  * Actualiza la información de un videojuego existente.
@@ -80,7 +80,7 @@ const addVideogame = async (videogameData) => {
  * reemplaza las relaciones existentes por las nuevas.
  * @param {number} id - El ID del videojuego a actualizar.
  * @param {Object} videogameData - Objeto con los datos a actualizar (puede incluir 'consoles').
- * @returns {Promise<number>} Devuelve el ID del videojuego actualizado.
+ * @returns {Promise<void>} No devuelve ningún valor. Ejecuta la operación en la base de datos.
  */
 const updateVideogame = async (id, videogameData) => {
   const { consoles, ...videogameInfo } = videogameData;
@@ -98,7 +98,7 @@ const updateVideogame = async (id, videogameData) => {
       await db('videogame_console').insert(relations);
     }
   }
-}
+};
 
 /**
  * Elimina un videojuego por su ID.
@@ -107,7 +107,7 @@ const updateVideogame = async (id, videogameData) => {
  */
 const removeVideogame = async (id) => {
   return await db('videogames').where({ id }).del();
-}
+};
 
 module.exports = {
   findAllVideogames,
