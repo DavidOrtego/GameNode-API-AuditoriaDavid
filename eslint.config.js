@@ -1,3 +1,4 @@
+const eslintConfigPrettier = require('eslint-config-prettier');
 const globals = require("globals");
 
 module.exports = [
@@ -16,5 +17,6 @@ module.exports = [
       "eqeqeq": "error",      
       "no-unused-vars": "warn" 
     }
-  }
+  },
+  eslintConfigPrettier
 ];
