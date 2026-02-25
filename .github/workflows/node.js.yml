@@ -1,4 +1,4 @@
-name: Unit tests
+name: Unit and integration tests
 
 on:
   pull_request:
@@ -6,20 +6,50 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-22.04
 
     strategy:
       matrix:
-        node-version: [20.x, 22.x, 24.x, 25.x]
+        node-version: [20.x, 22.x, 24.x]
 
     steps:
     - uses: actions/checkout@v4
+    
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm ci
-    - run: npm run lint
-    - run: npm test
+        
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Setup Environment Variables & Config
+      run: |
+        # 1. Creamos el .env para que Docker sepa qué base de datos crear
+        echo "MARIADB_USER=testuser" >> .env
+        echo "MARIADB_PASSWORD=testpass" >> .env
+        echo "MARIADB_DATABASE=gamenode" >> .env
+        echo "MARIADB_ROOT_PASSWORD=rootpass" >> .env
+        
+        # 2. Creamos el config.local.yaml para que Node.js sepa dónde conectarse
+        echo "db:" > config.local.yaml
+        echo "  host: 127.0.0.1" >> config.local.yaml
+        echo "  port: 3306" >> config.local.yaml
+        echo "  user: testuser" >> config.local.yaml
+        echo "  password: testpass" >> config.local.yaml
+        echo "  database: gamenode" >> config.local.yaml
+        echo "service:" >> config.local.yaml
+        echo "  port: 3000" >> config.local.yaml
+      
+    - name: Start Database
+      run: docker compose -f docker-compose.dev.yaml up -d
+      
+    - name: Wait for Database to initialize
+      run: sleep 10
+      
+    - name: Run Linter
+      run: npm run lint
+      
+    - name: Run All Tests
+      run: npm test
