@@ -7,3 +7,7 @@
 function yearsSinceFounded(foundedYear, currentYear = new Date().getFullYear()) {
   return currentYear - foundedYear;
 }
+
+module.exports = {
+    yearsSinceFounded
+};
