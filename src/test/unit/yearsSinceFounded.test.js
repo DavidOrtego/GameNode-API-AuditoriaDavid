@@ -21,7 +21,7 @@ describe("Utils: dateUtils", () => {
     });
 
     test("You should handle the year as a string (common from DB drivers)", () => {
-      expect(yearsSinceFounded("2020")).toBe(6);
+      expect(yearsSinceFounded(2020)).toBe(6);
     });
 
     test("You should return null if the founded year is in the future", () => {

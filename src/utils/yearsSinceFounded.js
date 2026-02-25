@@ -5,7 +5,12 @@
  * @returns {number} Años desde el año de fundación hasta el año actual.
  */
 function yearsSinceFounded(foundedYear, currentYear = new Date().getFullYear()) {
-  return currentYear - foundedYear;
+  
+    if ((foundedYear > currentYear) || (typeof foundedYear !== 'number')) {
+      return null;
+    }
+
+    return currentYear - foundedYear;
 }
 
 module.exports = {
