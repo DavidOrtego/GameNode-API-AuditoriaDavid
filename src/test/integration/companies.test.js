@@ -42,4 +42,28 @@ describe('Integration tests for companies API', () => {
       expect(response.body.data[0]).toHaveProperty('yearsSinceFounded');
     });
   });
+
+  describe('GET /companies/:id', () => {
+    test('returns company by id (200)', async () => {
+      const res = await request(app).get('/companies/1');
+      expect(res.statusCode).toBe(200);
+      expect(res.body.title).toBe('success');
+      expect(res.body.data).toHaveProperty('id');
+      expect(res.body.data.id).toBe(1);
+      expect(res.body.data.name).toBe('Nintendo');
+      expect(res.body.data).toHaveProperty('yearsSinceFounded');
+    });
+
+    test('returns 404 when not found', async () => {
+      const res = await request(app).get('/companies/999999');
+      expect(res.statusCode).toBe(404);
+      expect(res.body.title).toBe('not-found');
+    });
+
+    test('returns 400 for invalid id', async () => {
+      const res = await request(app).get('/companies/abc');
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toHaveProperty('errors');
+    });
+  });
 });
