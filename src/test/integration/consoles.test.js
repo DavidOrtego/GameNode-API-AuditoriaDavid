@@ -203,4 +203,29 @@ describe('Integration test for consoles API', () => {
       expect(Array.isArray(response.body.errors)).toBe(true);
     });
   });
+
+  // DELETE /consoles/:id
+
+  describe('DELETE /consoles/:id', () => {
+
+    test('should delete a console and return 200', async () => {
+
+        const response = await request(app).delete('/consoles/1');
+
+        expect(response.statusCode).toEqual(200);
+        expect(response.body.title).toBe('success');
+        expect(response.body.message).toBe('Console with id 1 deleted successfully');
+
+        const dbConsole = await db('consoles').where({ id: 1 }).first();
+        expect(dbConsole).toBeUndefined();
+    });
+
+    test('should return 404 if console to delete is not found', async () => {
+
+        const response = await request(app).delete('/consoles/1');
+
+        expect(response.statusCode).toEqual(404);
+        expect(response.body.title).toBe('not-found');
+    });
+});
 });
