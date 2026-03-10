@@ -22,7 +22,8 @@ describe('Integration tests for companies API', () => {
       country: 'Japón',
       year_founded: 1889,
       website: 'https://www.nintendo.com',
-      logo: 'logo.png'
+      logo: 'logo.png',
+      address: 'Kyoto, Japan'
     });
 
   });
@@ -46,6 +47,7 @@ describe('Integration tests for companies API', () => {
 
       expect(response.body.data[0].name).toBe('Nintendo');
       expect(response.body.data[0]).toHaveProperty('yearsSinceFounded');
+      
     
     });
 
@@ -64,6 +66,7 @@ describe('Integration tests for companies API', () => {
       expect(res.body.data.id).toBe(1);
       expect(res.body.data.name).toBe('Nintendo');
       expect(res.body.data).toHaveProperty('yearsSinceFounded');
+
     
     });
 
@@ -98,7 +101,8 @@ describe('Integration tests for companies API', () => {
         country: 'Spain',
         year_founded: 1995,
         website: 'https://integration.co',
-        logo: 'logo.png'
+        logo: 'logo.png',
+        address: 'Zaragoza, Spain'
       };
 
       const res = await request(app).post('/companies').send(payload);
@@ -154,7 +158,8 @@ describe('Integration tests for companies API', () => {
         description: 'Updated desc',
         country: 'USA',
         year_founded: 2001,
-        website: 'https://updated.co'
+        website: 'https://updated.co',
+        address: 'New York, USA'
       };
 
       const res = await request(app).put('/companies/1').send(payload);

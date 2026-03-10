@@ -70,6 +70,14 @@ const validateAddCompany = [
     .isLength({ max: 255 })
     .withMessage("Website must be at most 255 characters long"),
 
+  body("address")
+    .notEmpty()
+    .withMessage("Address is required")
+    .isString()
+    .withMessage("Address must be a string")
+    .isLength({ max: 255 })
+    .withMessage("Address must be at most 255 characters long"),
+
   validateResult,
 ];
 
